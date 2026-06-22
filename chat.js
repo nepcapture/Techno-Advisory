@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>พี่เทคโน AI ครูแนะแนว | วิทยาลัยเทคโนโลยีชลบุรี</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --navy: #1a2f5e;
+    --navy-light: #2a4080;
+    --gold: #f5a623;
+    --white: #ffffff;
+    --gray-bg: #f4f6fb;
+    --gray-light: #e8ecf4;
+    --gray-text: #6b7280;
+    --text-dark: #1a1a2e;
+    --bubble-ai: #eef2ff;
+    --radius: 16px;
+    --radius-sm: 10px;
+  }
+  body {
+    font-family: 'Sarabun', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--gray-bg);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    max-width: 480px;
+    margin: 0 auto;
+  }
+  .header {
+    background: var(--navy);
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 12px rgba(26,47,94,0.3);
+  }
+  .avatar-wrap { position: relative; flex-shrink: 0; }
+  .avatar {
+    width: 44px; height: 44px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--gold) 0%, #ff8c42 100%);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; border: 2px solid rgba(255,255,255,0.3);
+  }
+  .online-dot {
+    width: 10px; height: 10px; background: #4ade80;
+    border-radius: 50%; border: 2px solid var(--navy);
+    position: absolute; bottom: 1px; right: 1px;
+  }
+  .header-info h1 { color: white; font-size: 15px; font-weight: 700; line-height: 1.2; }
+  .header-info p { color: rgba(255,255,255,0.6); font-size: 11px; margin-top: 1px; }
+  .header-logo {
+    margin-left: auto; background: rgba(255,255,255,0.12);
+    border-radius: 8px; padding: 4px 10px;
+    color: rgba(255,255,255,0.85); font-size: 10px;
+    font-weight: 600; text-align: center; line-height: 1.3;
+  }
+  .chat-area {
+    flex: 1; overflow-y: auto; padding: 16px 14px;
+    display: flex; flex-direction: column; gap: 10px; padding-bottom: 8px;
+  }
+  .welcome-card {
+    background: white; border-radius: var(--radius);
+    padding: 18px 16px; border: 1px solid var(--gray-light);
+    text-align: center; margin-bottom: 4px;
+  }
+  .welcome-card .big-avatar {
+    width: 64px; height: 64px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--gold) 0%, #ff8c42 100%);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 30px; margin: 0 auto 12px;
+    box-shadow: 0 4px 16px rgba(245,166,35,0.3);
+  }
+  .welcome-card h2 { color: var(--navy); font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+  .welcome-card p { color: var(--gray-text); font-size: 13px; line-height: 1.6; }
+  .tagline {
+    display: inline-block; background: var(--gray-bg);
+    color: var(--navy); font-size: 12px; font-weight: 600;
+    padding: 4px 12px; border-radius: 20px; margin-top: 10px;
+    border: 1px solid var(--gray-light);
+  }
+  .chips-label {
+    font-size: 11px; color: var(--gray-text);
+    font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px;
+  }
+  .chips-wrap { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
+  .chip {
+    background: white; border: 1.5px solid var(--navy);
+    color: var(--navy); border-radius: 20px; padding: 7px 14px;
+    font-size: 12.5px; font-weight: 600; cursor: pointer;
+    transition: all 0.15s ease; font-family: inherit; line-height: 1.3;
+  }
+  .chip:hover { background: var(--navy); color: white; transform: translateY(-1px); }
+  .chip:active { transform: scale(0.97); }
+  .msg-row {
+    display: flex; align-items: flex-end; gap: 8px;
+    animation: fadeUp 0.25s ease;
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .msg-row.user { flex-direction: row-reverse; }
+  .msg-avatar {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--gold) 0%, #ff8c42 100%);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; flex-shrink: 0;
+  }
+  .bubble { max-width: 78%; padding: 11px 14px; border-radius: var(--radius); font-size: 14px; line-height: 1.65; }
+  .bubble.ai {
+    background: var(--bubble-ai); color: var(--text-dark);
+    border-radius: var(--radius) var(--radius) var(--radius) 4px;
+    border: 1px solid var(--gray-light);
+  }
+  .bubble.user {
+    background: var(--navy); color: white;
+    border-radius: var(--radius) var(--radius) 4px var(--radius);
+  }
+  .typing-row { display: flex; align-items: flex-end; gap: 8px; animation: fadeUp 0.2s ease; }
+  .typing-bubble {
+    background: var(--bubble-ai); border: 1px solid var(--gray-light);
+    border-radius: var(--radius) var(--radius) var(--radius) 4px;
+    padding: 12px 16px; display: flex; gap: 5px; align-items: center;
+  }
+  .dot {
+    width: 7px; height: 7px; background: var(--navy);
+    border-radius: 50%; opacity: 0.4;
+    animation: bounce 1.2s infinite ease-in-out;
+  }
+  .dot:nth-child(2) { animation-delay: 0.2s; }
+  .dot:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes bounce {
+    0%, 80%, 100% { transform: translateY(0); opacity: 0.4; }
+    40% { transform: translateY(-6px); opacity: 1; }
+  }
+  .line-cta {
+    background: white; border: 1.5px solid #06c755;
+    border-radius: var(--radius-sm); padding: 12px 16px;
+    display: flex; align-items: center; gap: 12px;
+    margin-top: 4px; cursor: pointer; transition: all 0.15s; text-decoration: none;
+  }
+  .line-cta:hover { background: #f0fff5; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(6,199,85,0.15); }
+  .line-icon {
+    width: 36px; height: 36px; background: #06c755;
+    border-radius: 8px; display: flex; align-items: center;
+    justify-content: center; font-size: 18px; flex-shrink: 0;
+  }
+  .line-cta-text strong { display: block; color: #065f46; font-size: 13px; font-weight: 700; }
+  .line-cta-text span { color: var(--gray-text); font-size: 11.5px; }
+  .line-cta-arrow { margin-left: auto; color: #06c755; font-size: 18px; }
+  .input-bar {
+    background: white; border-top: 1px solid var(--gray-light);
+    padding: 12px 14px; display: flex; gap: 10px;
+    align-items: flex-end; position: sticky; bottom: 0;
+  }
+  .input-field {
+    flex: 1; border: 1.5px solid var(--gray-light);
+    border-radius: 22px; padding: 10px 16px;
+    font-size: 14px; font-family: inherit; outline: none;
+    resize: none; max-height: 100px; line-height: 1.5;
+    color: var(--text-dark); transition: border-color 0.15s;
+  }
+  .input-field:focus { border-color: var(--navy); }
+  .input-field::placeholder { color: #9ca3af; }
+  .send-btn {
+    width: 42px; height: 42px; border-radius: 50%;
+    background: var(--navy); border: none; color: white;
+    font-size: 18px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.15s; flex-shrink: 0;
+  }
+  .send-btn:hover { background: var(--navy-light); transform: scale(1.05); }
+  .send-btn:disabled { background: var(--gray-light); cursor: not-allowed; transform: none; }
+  .error-msg {
+    background: #fef2f2; border: 1px solid #fecaca; color: #dc2626;
+    border-radius: var(--radius-sm); padding: 10px 14px; font-size: 12.5px; line-height: 1.5;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="avatar-wrap">
+    <div class="avatar">👨‍🏫</div>
+    <div class="online-dot"></div>
+  </div>
+  <div class="header-info">
+    <h1>พี่เทคโน ครูแนะแนว AI</h1>
+    <p>วิทยาลัยเทคโนโลยีชลบุรี • ออนไลน์ตลอด 24 ชม.</p>
+  </div>
+  <div class="header-logo">CTC<br>เทคโนชล</div>
+</div>
+
+<div class="chat-area" id="chatArea">
+
+  <div class="welcome-card">
+    <div class="big-avatar">👨‍🏫</div>
+    <h2>สวัสดีครับ! ผมพี่เทคโนเอง</h2>
+    <p>ครูแนะแนว AI ของวิทยาลัยเทคโนโลยีชลบุรี<br>ถามได้ทุกเรื่อง ไม่ตัดสิน ตอบตรงๆ ครับ</p>
+    <span class="tagline">✦ ถามได้ ไม่ต้องอาย ✦</span>
+  </div>
+
+  <div id="chipsSection">
+    <p class="chips-label">เลือกคำถามที่อยากรู้ 👇</p>
+    <div class="chips-wrap">
+      <button class="chip" onclick="sendChip(this)">ไม่รู้ว่าตัวเองชอบอะไร ช่วยแนะนำหน่อยได้ไหม?</button>
+      <button class="chip" onclick="sendChip(this)">ปวช. กับ ม.ปลาย ต่างกันยังไง?</button>
+      <button class="chip" onclick="sendChip(this)">จบแล้วทำงานที่ไหนได้บ้าง?</button>
+      <button class="chip" onclick="sendChip(this)">บรรยากาศในวิทยาลัยเป็นยังไง?</button>
+      <button class="chip" onclick="sendChip(this)">ค่าเทอมและค่าใช้จ่ายเท่าไหร่?</button>
+      <button class="chip" onclick="sendChip(this)">กลัวว่าจะเรียนไม่ไหว ทำยังไงดี?</button>
+    </div>
+  </div>
+
+</div>
+
+<div class="input-bar">
+  <textarea
+    class="input-field"
+    id="msgInput"
+    placeholder="พิมพ์ถามพี่เทคโนได้เลยครับ..."
+    rows="1"
+    onkeydown="handleKey(event)"
+    oninput="autoResize(this)"
+  ></textarea>
+  <button class="send-btn" id="sendBtn" onclick="sendMessage()" title="ส่งข้อความ">&#9658;</button>
+</div>
+
+<script>
+let messages = [];
+let isLoading = false;
+let ctaShown = false;
+
+function sendChip(btn) {
+  document.getElementById('chipsSection').style.display = 'none';
+  sendText(btn.textContent.trim());
+}
+
+function handleKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+}
+
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 100) + 'px';
+}
+
+function sendMessage() {
+  const input = document.getElementById('msgInput');
+  const text = input.value.trim();
+  if (!text || isLoading) return;
+  input.value = '';
+  input.style.height = 'auto';
+  sendText(text);
+}
+
+function sendText(text) {
+  appendUser(text);
+  messages.push({ role: 'user', content: text });
+  document.getElementById('chipsSection') && (document.getElementById('chipsSection').style.display = 'none');
+
+  showTyping();
+  isLoading = true;
+  document.getElementById('sendBtn').disabled = true;
+
+  fetch('/api/chat', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ messages })
+  })
+  .then(r => r.json())
+  .then(data => {
+    removeTyping();
+    isLoading = false;
+    document.getElementById('sendBtn').disabled = false;
+
+    if (data.error) { appendError('เกิดข้อผิดพลาด: ' + data.error); return; }
+
+    messages.push({ role: 'assistant', content: data.reply });
+    appendAI(data.reply);
+
+    const triggerWords = ['สมัคร', 'วันรับ', 'เอกสาร', 'ทักไลน์', 'line', 'โทร'];
+    if (!ctaShown && (messages.length >= 6 || triggerWords.some(w => data.reply.toLowerCase().includes(w)))) {
+      ctaShown = true;
+      setTimeout(appendLineCTA, 600);
+    }
+  })
+  .catch(() => {
+    removeTyping();
+    isLoading = false;
+    document.getElementById('sendBtn').disabled = false;
+    appendError('ไม่สามารถเชื่อมต่อได้ครับ กรุณาลองใหม่อีกครั้ง');
+  });
+}
+
+function appendUser(text) {
+  const row = document.createElement('div');
+  row.className = 'msg-row user';
+  row.innerHTML = `<div class="bubble user">${esc(text)}</div>`;
+  document.getElementById('chatArea').appendChild(row);
+  scrollBottom();
+}
+
+function appendAI(text) {
+  const row = document.createElement('div');
+  row.className = 'msg-row';
+  row.innerHTML = `<div class="msg-avatar">👨‍🏫</div><div class="bubble ai">${esc(text)}</div>`;
+  document.getElementById('chatArea').appendChild(row);
+  scrollBottom();
+}
+
+function appendError(text) {
+  const div = document.createElement('div');
+  div.className = 'error-msg';
+  div.textContent = text;
+  document.getElementById('chatArea').appendChild(div);
+  scrollBottom();
+}
+
+function appendLineCTA() {
+  const a = document.createElement('a');
+  a.className = 'line-cta';
+  a.href = 'https://line.me/ti/p/~@technochon';
+  a.target = '_blank';
+  a.innerHTML = `
+    <div class="line-icon">💬</div>
+    <div class="line-cta-text">
+      <strong>คุยกับทีมงานจริงๆ ได้เลยครับ</strong>
+      <span>ทักไลน์ CTC · ตอบไวครับ</span>
+    </div>
+    <span class="line-cta-arrow">›</span>`;
+  document.getElementById('chatArea').appendChild(a);
+  scrollBottom();
+}
+
+function showTyping() {
+  const div = document.createElement('div');
+  div.className = 'typing-row';
+  div.id = 'typingIndicator';
+  div.innerHTML = `<div class="msg-avatar">👨‍🏫</div><div class="typing-bubble"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>`;
+  document.getElementById('chatArea').appendChild(div);
+  scrollBottom();
+}
+
+function removeTyping() {
+  const el = document.getElementById('typingIndicator');
+  if (el) el.remove();
+}
+
+function scrollBottom() {
+  const c = document.getElementById('chatArea');
+  c.scrollTop = c.scrollHeight;
+}
+
+function esc(t) {
+  return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+}
+</script>
+</body>
+</html>
