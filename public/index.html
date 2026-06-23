@@ -285,7 +285,7 @@ function sendText(text) {
     appendAI(data.reply);
 
     const triggerWords = ['สมัคร', 'วันรับ', 'เอกสาร', 'ทักไลน์', 'line', 'โทร'];
-    if (!ctaShown && (messages.length >= 6 || triggerWords.some(w => data.reply.toLowerCase().includes(w)))) {
+    if (!ctaShown && (messages.length >= 8 || triggerWords.some(w => data.reply.toLowerCase().includes(w)))) {
       ctaShown = true;
       setTimeout(appendLineCTA, 600);
     }
